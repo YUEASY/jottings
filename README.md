@@ -1,6 +1,6 @@
 # jottings
 
-- MySQL 
-- C++
-- LINUX
+- MySQL    (上传中)
+- C++      (整理中)
+- LINUX    (整理中)
 - more...
