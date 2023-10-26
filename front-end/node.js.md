@@ -61,11 +61,9 @@ node -v
 npm -v
 ```
 
+> 如果能够正常出现版本信息，那么表明node.js 已经安装成功。
 
 
-能够正常出现版本信息，那么表明node.js 已经安装成功，如下：
-
-![image-20231025170436048](./node.js.assets/image-20231025170436048.png)
 
 ### 应用示例
 
@@ -475,8 +473,6 @@ server.listen(3000, () => {
 node  server.js
 ```
 
-
-
 在浏览器中访问 http://localhost:3000?guess=50（这里的50是猜测的数字，可以更改）。
 
 ### 步骤4. 发布 npm 包
@@ -547,7 +543,7 @@ npm publish
 
 上传成功在 npm 官网便可看到此项目：
 
-![image-20231025170705278](./node.js.assets/image-20231025170705278.png)
+![image-20231025170713163](./node.js.assets/image-20231025170713163.png)
 
 ### 删除 npm 包
 
@@ -563,15 +559,11 @@ npm publish
 npm unpublish [package_name]@[version]
 ```
 
-
-
-如下：
+例如
 
 ```bash
 npm unpublish guess-number-game@1.0.0
 ```
-
-
 
 #### 2. 删除整个包
 
@@ -579,10 +571,749 @@ npm unpublish guess-number-game@1.0.0
 npm unpublish [package_name] --force
 ```
 
-
-
-如下：
+例如：
 
 ```bash
 npm unpublish guess-number-game --force
+```
+
+
+
+# Node 文件与路径
+
+## 一、认识文件系统模块
+
+Node.js文件系统模块是一个封装了I/O操作的集合。使用这个模块，其中所有的方法都有同步和异步两种模式。
+
+异步方法**最后一个参数都是回调函数**，这个回调的参数取决于方法，不过第一个参数一般都是异常。如果操作成功，那么第一个参数就是null或undefined。
+
+当使用一个同步操作的时候，任意的异常都立即抛出，可以用try/catch来处理异常，使得程序正常运行。
+
+> Tips:
+> 建议大家使用异步方法，比起同步，异步方法性能更高，速度更快，而且没有阻塞。
+
+导入文件系统模块(fs)的语法如下：
+
+```js
+const fs = require("fs")
+```
+
+
+
+## 二、基本文件操作
+
+### 1、文件读取操作
+
+#### 创建读取的文件
+
+首先我们需要先创建一个 input.txt 文件，并在此文件中输入以下内容：
+
+```txt
+Node.js 是一个免费、开源、跨平台的 JavaScript 运行时环境，
+允许开发人员在浏览器之外编写命令行工具和服务器端脚本。
+```
+
+
+
+#### 创建 file.js，并实现文件的读取：
+
+**异步操作**
+
+```js
+const fs = require('fs')
+
+// 异步读取操作
+fs.readFile('input.txt', 'utf-8', (err, data) => {
+  if (err) {
+    return console.error(err);
+  }
+  console.log("异步读取到的数据：\n" + data.toString());
+})
+```
+
+
+
+**同步操作**
+
+```js
+const fs = require('fs')
+
+// 同步读取操作
+try {
+  const data = fs.readFileSync('input.txt', 'utf-8');
+  console.log("同步读取到的数据：\n" + data.toString());
+} catch (err) {
+  console.error(err);
+}
+```
+
+
+
+### 2、文件写入操作
+
+通过 `fs.writeFile()` 来将数据写入到文件中，代码如下：
+
+```js
+const fs = require('fs')
+
+// 文件写入操作
+const content = "这是一段需要写入到本地文件的内容。"
+fs.writeFile('output.txt', content, (err) => {
+  if (err) throw err;
+  console.log("The file was saved!");
+})
+```
+
+### 3、检查文件状态
+
+通过 `fs.stat()` 来检查文件的状态，在其回调函数中可以通过第 stats 参数来获取相关状态，代码如下：
+
+```js
+const fs = require('fs')
+
+// 检查文件状态
+fs.stat('output.txt', (err, stats) => {
+  if (err) throw err;
+  console.log(stats);
+  console.log(`File size: ${stats.size} bytes`);
+})
+
+// 输出:
+//  Stats {
+//   dev: 16777232,
+//   mode: 33188,
+//   nlink: 1,
+//   uid: 501,
+//   gid: 20,
+//   rdev: 0,
+//   blksize: 4096,
+//   in0: 49736811,
+//   size: 51,
+//   blocks: 8,
+//   atimeMs: 1698135252673.6626,
+//   mtimeMs: 1698135251233.6123,
+//   ctimeMs: 1698135251233.6123,
+//   birthtimeMs: 1698135251233.3376,
+//   atime: 2023-10-24T08:14:12.674Z,
+//   mtime: 2023-10-24T08:14:11.234Z,
+//   ctime: 2023-10-24T08:14:11.234Z,
+//   birthtime: 2023-10-24T08:14:11.233Z
+//  }
+//  File size: 51 bytes
+```
+
+#### 判断文件类型
+
+| 方法                      | 描述                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| stats.isFile()            | 如果是文件返回 true，否则返回 false。                        |
+| stats.isDirectory()       | 如果是目录返回 true，否则返回 false。                        |
+| stats.isBlockDevice()     | 如果是块设备返回 true，否则返回 false。                      |
+| stats.isCharacterDevice() | 如果是字符设备返回 true，否则返回 false。                    |
+| stats.isSymbolicLink()    | 如果是软链接返回 true，否则返回 false。                      |
+| stats.isFIFO()            | 如果是FIFO，返回true，否则返回 false。FIFO是UNIX中的一种特殊类型的命令管道。 |
+| stats.isSocket()          | 如果是 Socket 返回 true，否则返回 false。                    |
+
+
+
+### 4、删除文件
+
+通过 `fs.unlink()` 来删除文件， 代码如下：
+
+```js
+// 文件删除操作
+fs.unlink('output.txt', (err) => {
+  if (err) throw err;
+  console.log("The file was deleted!");
+})
+```
+
+## 三、流的概念和应用
+
+### 数据流
+
+数据的连续传输方式，允许数据从来源被发送和处理，而不需要全部加载到内存中。
+
+**为什么使用流？**
+
+- 高效：对于大数据量，不需要一次性加载，节省内存。
+- 实时：数据可以边读边处理，不必等待全部数据传输完成。
+
+### 流的种类
+
+#### 1. 可读流：从来源读取数据的流
+
+使用 `fs.createReadStream` 方法读取文件
+
+```js
+const fs = require('fs')
+
+const readStream = fs.createReadStream('input.txt', 'utf-8')
+readStream.on('data', (chunk) => {
+  console.log(chunk);
+})
+```
+
+
+
+#### 2. 可写流：项目表写入数据的流
+
+使用 `fs.createWriteStream` 方法写入文件
+
+```js
+const fs = require('fs')
+
+const writeStream = fs.createWriteStream('output.txt')
+writeStream.write("这是通过可写流写入的文件内容。")
+writeStream.end()
+```
+
+
+
+### 3. 双向流
+
+既可以读取又可以写入的流，常用于数据的转换和处理，如下使用 zlib 模块创建一个gzip压缩流：
+
+#### **文件压缩**
+
+```js
+const fs = require('fs');
+// 导入Node.js内置的zlib模块，用于处理压缩和解压缩操作
+const zlib = require('zlib')
+// 创建一个gzip压缩器
+const gzip = zlib.createGzip()
+// 使用fs模块创建一个可读流，用于读取名为'input.txt'的文件
+const input = fs.createReadStream('input.txt')
+// 使用fs模块创建一个可写流，用于将压缩后的数据写入名为'input.txt.gz'的文件
+const output = fs.createWriteStream('input.txt.gz')
+// 将可读流通过gzip压缩，然后将压缩后的数据通过可写流写入文件
+input.pipe(gzip).pipe(output)
+```
+
+以上 `pipe` 是 Node.js 中用于将数据从一个可读流传输到一个可写流的方法。`input.pipe(gzip)` 将可读流 input 的数据传输到了 gzip 这个压缩器中，然后 gzip 压缩后的数据被传输到了 output 这个可写流中。
+
+这种方式可以有效地处理大量的数据，而不需要一次性将整个数据集加载到内存中，这对于处理大文件或网络传输时非常重要。通过逐块地处理数据，可以节省内存并提高程序的性能。
+
+#### **文件解压**
+
+```js
+const zlib = require('zlib');
+const fs = require('fs');
+// 创建一个解压缩器
+const gunzip = zlib.createGunzip();
+// 创建一个可读流，用于读取压缩后的文件
+const compressedFile = fs.createReadStream('input.txt.gz');
+// 创建一个可写流，用于写入解压后的数据
+const output = fs.createWriteStream('output-unpack.txt');
+// 将压缩后的数据通过解压缩器，然后将解压后的数据通过可写流写入文件
+compressedFile.pipe(gunzip).pipe(output);
+```
+
+### 流的事件与控制流
+
+#### 常见的流事件
+
+- **data**：当有数据可读时触发。
+- **end**：当所有数据已被读取时触发。
+- **error**：在发生错误时触发。
+- **finish**：当所有数据已被写入底层系统时触发。
+
+#### 控制流
+
+`pipe()` 方法：连接可读流和可写流，自动管理数据的流动。如下例子，将一个文件的内容复制到另一个文件：
+
+```js
+const readStream = fs.createReadStream('source.txt');
+const writeStream = fs.createWriteStream('destination.txt');
+readStream.pipe(writeStream);
+```
+
+
+
+#### 流的错误处理
+
+为流添加 error 事件监听器来处理可能出现的错误。
+
+```js
+readStream.on('error', (err) => {
+    console.error('An error occurred:', err.message);
+});
+```
+
+
+
+#### 服务器中使用流
+
+```js
+const http = require('http');
+const fs = require('fs')
+
+const server = http.createServer((req, res) => {
+    const stream = fs.createReadStream(`.${req.url}`);
+    stream.pipe(res);
+});
+server.listen(3000, () => {
+    console.log(`Server running at http://127.0.0.1:3000`);
+});
+```
+
+
+
+以上代码，对于每一个HTTP请求，都试图在服务器的当前目录下找到一个与请求URL匹配的文件。例如，如果请求的URL是 `/index.html`，那么服务器会尝试读取当前目录下的 `index.html`文件。
+
+## 四、路径与地址
+
+### 路径处理模块 `path`
+
+- 绝对路径：从文件系统的根目录到文件的完整路径。
+- 相对路径：相对于当前工作目录或当前文件的路径。
+
+#### 常用的路径方法
+
+##### 1、path.join( )：连接路径片段
+
+示例：连接多个路径片段。
+
+```js
+const path = require('path');
+const fullPath = path.join(__dirname, 'subfolder', 'file.txt');
+console.log(fullPath);  // 输出：/Users/humbertcheung/Desktop/node-web3/subfolder/file.txt
+```
+
+
+
+##### 2、path.resolve( )：解析为绝对路径
+
+示例：从相对路径解析到绝对路径。
+
+```js
+const path = require('path');
+const absolutePath = path.resolve('subfolder', 'file.txt');
+console.log(absolutePath); // 输出：/Users/humbertcheung/Desktop/node-web3/subfolder/file.txt
+```
+
+
+
+##### 3、path.extname( )：获取文件扩展名
+
+示例：检查文件的扩展名。
+
+```js
+const path = require('path');
+const extension = path.extname('sample.txt');
+console.log(extension);  // 输出: .txt
+```
+
+
+
+##### 4、path.dirname( )：获取目录名
+
+示例：从文件路径中提取目录。
+
+```js
+const path = require('path');
+const directory = path.dirname('/path/to/sample.txt');
+console.log(directory);  // 输出: /path/to
+```
+
+
+
+##### 5、path.basename()：获取基本文件名
+
+示例：从文件路径中提取文件名。
+
+```js
+const path = require('path');
+const filename = path.basename('/path/to/sample.txt');
+console.log(filename);  // 输出: sample.txt
+```
+
+
+
+### URL的基本结构与操作
+
+#### URL的组成部分
+
+- 协议：如 http 或 https
+- 域名/主机：如 [www.example.com](http://www.example.com)
+- 端口：如 80 或 443
+- 路径：如 /about 或 /products/item1
+- 查询参数：如 ?id=123&user=alice
+- 锚点：如 #section1
+
+#### url 模块
+
+使用 url 模块解析和构造URL:
+
+##### 1、 url.parse( )：将URL字符串转换为URL对象
+
+示例：
+
+```js
+const url = require('url');
+const parsedUrl = url.parse('https://www.example.com:80/about?user=alice#section1');
+console.log(parsedUrl.protocol);  // 输出: https:
+console.log(parsedUrl.hostname);  // 输出: www.example.com
+```
+
+
+
+##### 2、url.format( )：将URL对象转换为URL字符串
+
+示例：
+
+```js
+const url = require('url');
+const urlString = url.format({
+    protocol: 'https',
+    hostname: 'www.example.com',
+    port: '80',
+    pathname: '/about',
+    query: { user: 'alice' },
+    hash: '#section1'
+});
+console.log(urlString);  // 输出: https://www.example.com:80/about?user=alice#section1
+```
+
+
+
+##### 3、url.resolve( )：解析浏览器超链接，生成绝对URL
+
+示例：
+
+```js
+const url = require('url');
+const resolvedUrl = url.resolve('https://www.example.com/', '/about');
+console.log(resolvedUrl);  // 输出: https://www.example.com/about
+```
+
+
+
+
+
+# Node 事件与HTTP模块
+
+## 一、事件与异步编程
+
+### 1、事件驱动编程模型
+
+在传统的编程模型中，我们可能习惯了线性地、从上到下地执行代码。但在Node.js中，我们使用的是一个不同的模型，它被称为 **事件驱动编程模型**。
+
+**特点**
+
+- 单线程：Node.js 采用的事单线程的事件驱动模型，不过因为 V8 引擎提供的异步执行回调接口，通过这些接口可以处理大量的并发，所以性能非常高。
+- 事件循环：由于了有事件循环，Node.js可以在背后等待事件发生，而不是闲置。当观察到事件发生后，会处理这些事件并执行相应的回调函数。
+
+> **实际应用：**
+> 与传统的多线程/多进程模型相比，事件驱动提供了更高的并发性和更低的开销。
+
+### 2、异步编程与回调函数
+
+- Node.js 异步编程的直接体现就是回调。
+- 异步编程依托于回调来实现，但不能说使用了回调后程序就异步化了。
+- 回调函数在完成任务后就会被调用，Node 使用了大量的回调函数，Node 所有 API 都支持回调函数。
+
+意味着，当我们要读取一个文件或发出一个网络请求时，Node.js不会等待操作完成，而是继续执行其他代码。一旦操作完成，一个回调函数会被调用，告诉我们结果。这样在执行代码时就没有阻塞或等待文件 I/O 操作。这就大大提高了 Node.js 的性能，可以处理大量的并发请求。
+
+**阻塞型操作**
+
+如之前实现同步的文件读取操作，就是典型的阻塞操作：
+
+```js
+// 同步读取操作
+const fs = require('fs')
+const data = fs.readFileSync('input.txt', 'utf-8');
+console.log("同步读取到的数据：\n" + data.toString());
+console.log("程序执行结束!");
+```
+
+
+
+输出结果：
+
+```bash
+同步读取到的数据：
+Node.js 是一个免费、开源、跨平台的 JavaScript 运行时环境，
+允许开发人员在浏览器之外编写命令行工具和服务器端脚本。
+
+程序执行结束!
+```
+
+
+
+可以看出需要在文件读取完后才会接着执行程序。
+
+**非阻塞型操作（异步）**
+
+回调函数一般作为函数的最后一个参数出现，比如之前异步读取文件的操作：
+
+```js
+const fs = require('fs')
+
+// 异步读取操作
+fs.readFile('input.txt', 'utf-8', (err, data) => {
+  if (err) {
+    return console.error(err);
+  }
+  console.log("异步读取到的数据：\n" + data.toString());
+})
+console.log("程序执行结束!");
+```
+
+
+
+输出结果：
+
+```bash
+程序执行结束!
+异步读取到的数据：
+Node.js 是一个免费、开源、跨平台的 JavaScript 运行时环境，
+允许开发人员在浏览器之外编写命令行工具和服务器端脚本。
+```
+
+
+
+可以看得出我们不需要等待文件读取完，这样就可以在读取文件时同时执行接下来的代码，大大提高了程序的性能。
+
+## 二、HTTP模块
+
+Node.js为我们提供了一个强大的HTTP模块，我们可以用它创建服务器和客户端。
+
+主要的应用有以下两部分:
+
+- **http.createServer**：作为web服务器，监听HTTP客户端请求并返回响应。
+- **http.createClient**：作为客户端，发起一个请求，获取服务端响应，还可以实现爬虫之类的工作。
+
+### （一）HTTP 服务器
+
+#### 1、创建服务器
+
+在之前的案例中，我们已经初步接触了创建服务器、启动服务器的基本操作：
+
+```js
+const http = require('http');
+const server = http.createServer((req, res) => {
+    res.end('Hello, Node.js!');
+});
+server.listen(3000);
+```
+
+
+
+以上代码:
+
+- 首先, 通过 `require('http')` 引入http模块。
+- 然后, 通过 `http.createServer([requestListener])` 来创建一个web服务器，并传入一个可选的回调函数，回调函数有两个参数分别代表客户端请求对象 `request` 和服务器端的响应对象`response`；以上案例中的服务器会对每个请求响应 **'Hello, Node.js!'**。
+- 最后, 使用 `server.listen([port][, hostname][, backlog][, callback])`, 开始在指定的 port 和 hostname 上接受 http 请求并做出响应。
+
+通过以上3步, 便可创建了一个简单的http服务器。
+
+#### 2、关闭服务器
+
+如何关闭刚刚创建的http服务器呢?
+
+```js
+server.close([calback])
+```
+
+
+
+#### 3、超时设置
+
+Node.js http 模块也提供了 `server.timeout` 用于设置服务器的超时时间，单位是毫秒。此属性的默认值是120000毫秒（2分钟）。如果在指定的时间内没有收到请求，服务器将自动关闭连接。
+
+```js
+// 设置超时时间为3分钟
+server.timeout = 180000;
+```
+
+
+
+#### 4、request 对象
+
+request 对象是 Node.js HTTP 服务的一个核心对象，它包含了客户端请求的所有信息。
+
+##### 常用属性与方法
+
+- request.url： 获取请求的URL字符串。
+- request.headers： 获取请求头对象，它包含了所有的HTTP请求头信息。
+- request.method： 获取HTTP请求方法，一般有几个选项，POST,GET和DELETE等，服务器可以根据客户端的不同请求方法进行不同的处理。
+- request.httpVersion： 获取HTTP协议的版本。
+- request.trailers： 存放附加的一些http头信息
+- request.socket： 用于监听客户端请求的socket对象
+
+如下，可以将请求信息通过写入流写入到一个文件中：
+
+```js
+const http = require('http')
+const fs = require('fs')
+
+const server = http.createServer((request, response) => {
+    response.statusCode = 200
+    response.setHeader('Content-Type', 'text/plain')
+    if (request.url === '/') {
+        let logFile = fs.createWriteStream('./log.txt')
+        logFile.write(`请求方法：${request.method} \r\n`)
+        logFile.write(`请求url：${request.url} \r\n`)
+        logFile.write(`请求头对象：${JSON.stringify(request.headers, null, 4)} \r\n`)
+        logFile.write(`请求http版本：${request.httpVersion} \r\n`)
+    }
+    response.end('Hello World\r\n')
+})
+
+server.listen(3000, '127.0.0.1', () => {
+    console.log('Server running at http://127.0.0.1:3000')
+})
+```
+
+
+
+- request.setEncoding(encoding)：设置请求的字符编码。
+
+> ```js
+> request.setEncoding('utf8');
+> ```
+>
+> 
+
+- request.on(event, listener):
+
+为请求对象添加事件监听器。常用事件包括 data（当接收到请求体数据时触发）和 end（当请求接收完毕时触发）
+
+```js
+request.on('data', (chunk) => {
+    console.log(chunk);  // 打印接收到的数据块
+});
+
+request.on('end', () => {
+    console.log('Request received.');
+});
+```
+
+
+
+#### 5、response 对象
+
+response 对象是 Node.js HTTP 服务的另一个核心对象，它包含了向客户端发送响应的所有方法和属性,可以控制 HTTP 响应的各个方面，包括状态码、头信息和响应体。以下是 response 对象中一些常用的属性和方法：
+
+##### 常用属性与方法
+
+- res.statusCode: 设置 HTTP 响应的状态码。
+
+```js
+res.statusCode = 200;
+```
+
+
+
+- res.setHeader(name, value): 设置 HTTP 响应头。
+
+```js
+res.setHeader('Content-Type', 'text/plain');
+```
+
+
+
+- res.writeHead(statusCode[, statusMessage][, headers]): 同时设置 HTTP 状态码、状态消息和响应头。
+
+```js
+res.writeHead(200, {'Content-Type': 'text/plain'});
+```
+
+
+
+- res.write(chunk[, encoding][, callback]): 向 HTTP 响应体写入数据。
+
+```js
+res.write('Hello World\n');
+```
+
+
+
+- res.end([data][, encoding][, callback]): 结束 HTTP 响应，可选地发送最后的数据块。
+
+```js
+res.end('Goodbye World\n');
+```
+
+
+
+- res.removeHeader(name): 移除已设置的 HTTP 响应头。
+
+```js
+res.removeHeader('Content-Encoding');
+```
+
+
+
+- res.setTimeout(msecs, callback): 设置发送完毕响应之前的超时时间，并在超时时执行回调函数。
+
+```js
+res.setTimeout(5000, () => {
+    console.log('Response timeout.');
+});
+```
+
+
+
+- res.getHeader(name): 获取已设置的 HTTP 响应头。
+
+```js
+const contentType = res.getHeader('Content-Type');
+```
+
+
+
+- res.addTrailers(headers): 在消息尾部添加 HTTP 尾部头。
+
+```js
+res.addTrailers({'Content-MD5': '7895bf4b8828b55ceaf47747b4bca667'});
+```
+
+
+
+### （二）HTTP客户端
+
+Node.js 内置的 `http` 模块提供了 `http.request` 和 `http.get` 两个函数，可以实现由客户端向 HTTP 服务器发起网络请求:
+
+#### 1、http.request
+
+对百度首页进行网络请求，打印出响应成功的200状态码和百度首页的HTML代码。
+
+```js
+const http = require('http')
+
+const options = {
+    hostname: 'www.baidu.com', //地址
+    port: 80, //端口号
+    method: 'GET' //请求方法
+};
+
+const req = http.request(options, function (res) {
+    res.setEncoding("utf-8"); //中文编码
+    res.on("data", function (data) {
+        console.log(data) //获取的网页数据
+    });
+    console.log(res.statusCode); //打印状态码
+});
+req.on("error", function (err) {
+    console.log(err.message); //报错信息
+});
+req.end();  //结束请求
+```
+
+
+
+#### 2、http.get
+
+```
+http.get` 就相当于是 `http.requset` 的简化版，且是不需要手动调用 `req.end()
+const http = require('http')
+
+http.get('http://www.baidu.com/', function (res) {
+    res.setEncoding("utf-8")
+    res.on("data",function(data){
+        console.log(data) //获取的网页数据
+    });
+});
 ```
