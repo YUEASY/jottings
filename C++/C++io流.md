@@ -58,10 +58,9 @@ C++标准库提供了4个全局流对象cin、cout、cerr、clog，使用cout进
    }
    ```
 
-   > 特别注意：由于 fstream 和 sstream 中的流是 iostream 的子类，故 定义了`ostream& operator<<`
+   > 特别注意：由于 ofstream 和 ostringstream 中的流是 ostream 的子类，故 定义了`ostream& operator<<`就会使用切片的思想自动实现了 `ostringstream& operator<<`  以及 `ofstream& operator<<` 
    >
-   > 就会使用切片的思想自动实现了 `ostringstream& operator<<`  以及 `ofstream& operator<<` 
-
+   
 5. 在线OJ中的输入和输出：
 
    - 对于IO类型的算法，一般都需要循环输入.
@@ -172,6 +171,7 @@ public:
         ifs.close();
 	}
 
+    // 因为可以使用流输入/输出，使用建议使用文本读写
 	void WriteTest(const ServerInfo& info)//文本 写
 	{
 		ofstream ofs(_filename.c_str());
@@ -192,8 +192,7 @@ private:
 
 int main()
 {
-    // 网络
-	、、ServerInfo info = { "127.0.0.1",80 };
+	ServerInfo info = { "127.0.0.1",80 };
 	//ConfigManager cm("config.bin");
 	////cm.WriteBin(info);
 	//cm.ReadBin(info);
@@ -229,3 +228,106 @@ int main()
 
 1. 打开/关闭 文件：`fs.open(filename, ...);`	/	`fs.close()`;
 2. 判断文件是否打开：`fs.is_open()`
+
+
+
+### 3. sstream
+
+在C语言中，如果想要将一个整形变量的数据转化为字符串格式，如何去做？
+
+1. 使用itoa()函数
+2. 使用sprintf()函数
+
+但是两个函数在转化时，都得**需要先给出保存结果的空间**，那空间要给多大呢，就不太好界定，而且**转化格式不匹配时，可能还会得到错误的结果甚至程序崩溃**。
+
+> 而在C++中，可以使用stringstream类对象来避开此问题。
+>
+> **stringstream** 使用 **string** 类对象代替字符数组，可以**避免缓冲区溢出的危险**，而且其会对参数类型进行推演，**不需要格式化控制**，也**不会出现格式化失败的风险**，因此使用更方便，更安全。
+
+#### 特点：
+
+1. 将 **数值类型数据** 格式化为 **字符串**
+
+```c++
+#include<sstream>
+int main()
+{
+    int a = 12345678;
+    string sa;
+    // 将一个整形变量转化为字符串，存储到string类对象中
+    stringstream s;
+    s << a;
+    s >> sa;
+    s.str("");
+    s.clear();   // 清空s, 不清空会转化失败
+    
+    double d = 12.34;
+    s << d;
+    s >> sa;
+    string sValue = s.str();   // str()方法：返回stringsteam中管理的string类型
+    cout << sValue << endl; 
+    return 0;
+}
+```
+
+> 注意：
+>
+> 1. s.clear()：多次转换时，必须使用clear将上次转换状态清空掉。stringstreams在转换结尾时(即最后一个转换后)，会将其内部状态设置为badbit因此下一次转换是必须调用clear()将状态重置为goodbit才可以转换，但是clear()不会将stringstreams底层字符串清空掉。
+> 2. s.str("")：将stringstream底层管理string对象设置成"", 否则多次转换时，会将结果全部累积在底层string对象中
+
+2. 字符串拼接
+
+```c++
+int main()
+{
+    stringstream sstream;
+    // 将多个字符串放入 sstream 中
+    sstream << "first" << " " << "string,";
+    sstream << " second string";
+    cout << "strResult is: " << sstream.str() << endl;
+    // 清空 sstream
+    sstream.str("");
+    sstream << "third string";
+    cout << "After clear, strResult is: " << sstream.str() << endl;
+    return 0;
+}
+```
+
+3. 序列化和反序列化结构数据
+
+```c++
+struct ChatInfo
+{
+    string _name; 
+    int _id;      
+    Date _date;   
+    string _msg;  
+};
+
+int main()
+{
+    // 结构信息序列化为字符串
+    ChatInfo winfo = { "张三", 135246, { 2022, 4, 10 }, "晚上一起看电影吧"};
+    ostringstream oss;
+    oss << winfo._name << " " << winfo._id << " " << winfo._date << " "<< winfo._msg;
+    string str = oss.str();
+    cout << str << endl;
+    // 我们通过网络这个字符串发送给对象，实际开发中，信息相对更复杂，
+    // 一般会选用Json、xml等方式进行更好的支持
+    // 字符串解析成结构信息
+    ChatInfo rInfo;
+    istringstream iss(str);
+    iss >> rInfo._name >> rInfo._id >> rInfo._date >> rInfo._msg;
+    cout << "-------------------------------------------------------"<< endl;
+    cout << "姓名：" << rInfo._name << "(" << rInfo._id << ") ";
+    cout <<rInfo._date << endl;
+    cout << rInfo._name << ":>" << rInfo._msg << endl;
+    cout << "-------------------------------------------------------"<< endl;
+    return 0;
+}
+```
+
+#### 独特接口：
+
+1. 可以使用 `s. str("")` 方法将底层 `string` 对象设置为 `""` 空字符串**。**
+2. 可以使用 `s.str()` 将让 `stringstream` 返回其底层的 `string` 对象。
