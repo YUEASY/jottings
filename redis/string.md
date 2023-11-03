@@ -18,6 +18,27 @@ string类型的内部编码有 3 种：
 
 ## 相关命令
 
+### 省流版
+
+| 命令                          | 执行效果                                | 时间复杂度                               |
+| ----------------------------- | --------------------------------------- | ---------------------------------------- |
+| set key value [key value...]  | 设置 key 的值为 value                   | O(k), k 是键个数                         |
+| get key                       | 获取 key 的值                           | O(1)                                     |
+| del key [key ...]             | 删除指定的 key                          | O(k), k 是键个数                         |
+| mset key value [key value...] | 批量设置指定的 key 和 value             | O(k), k 是键个数                         |
+| mget key [key ...]            | 批量获取 key 的值                       | O(k), k 是键个数                         |
+| incr key                      | 指定的 key 的值 +1                      | O(1)                                     |
+| decr key                      | 指定的 key 的值 -1                      | O(1)                                     |
+| incrby key n                  | 指定的 key 的值 +n                      | O(1)                                     |
+| decrby key n                  | 指定的 key 的值 -n                      | O(1)                                     |
+| incrbyfloat key n             | 指定的 key 的值 +n                      | O(1)                                     |
+| append key value              | 指定的 key 的值尾部追加 value           | O(1)                                     |
+| strlen key                    | 获取指定 key 的值的长度                 | O(1)                                     |
+| setrange key offset value     | 覆盖指定 key 的从 offset 开始的部分值   | O(n)，n 是字符串长度, <br/>通常视为 O(1) |
+| setrange key offset value     | 获取指定 key 的从 start 到 end 的部分值 | O(n)，n 是字符串长度,<br/> 通常视为 O(1) |
+
+
+
 ### 单次处理
 
 #### SET  (SET + EXPIRE)
@@ -56,23 +77,19 @@ GET key
 
 #### SETNX
 
-> key 不存在时设置
+> 当 key 不存在时设置
 
 ```
-SETNX key value
-```
-
-#### SETEX
-
-> key 存在时设置
-
-```
-SETEX key value
+SETNX key value [EX seconds|PX milliseconds]
 ```
 
 #### PSETEX
 
-> key 存在时设置(毫秒级)
+> 当 key 存在时设置(毫秒级)
+
+```
+PSETEX key value milliseconds
+```
 
 
 
