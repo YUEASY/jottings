@@ -107,7 +107,7 @@ C++标准库提供了4个全局流对象cin、cout、cerr、clog，使用cout进
 
 1. 获取单个字符/整行(以\n为结尾):
 
-     `char a; cin.get(a);`   / `char buf[100]; cin.getline(buf,sizeof buf);`
+     `char a; get(cin,a);`   / `string buf; getline(cin,buf);`
 
 2. 关闭和c语言中stdio的同步输入：`std::ios_base::sync_with_stdio(false);`, 在关闭下可以加快流输入，如果再使用 stdio 可能会导致意外交错字符。
 
