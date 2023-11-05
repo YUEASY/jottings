@@ -1,4 +1,4 @@
-## string 字符串
+# string 字符串
 
 **特点：对字符采用utf-8，二进制流存取，可以存入所有东西（内存限制 521MB）。**
 
@@ -199,7 +199,7 @@ INCRBYFLOAT key increment
 appdend KEY VALUE
 ```
 
-**返回值：**追加完成之后 string 的⻓度。
+**返回值：**追加完成之后 string 的长度。
 
 #### getrange
 

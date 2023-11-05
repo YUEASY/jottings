@@ -10,7 +10,7 @@
 >
 > ⽂的作用。
 
-# 内部编码
+## 内部编码
 
 哈希的内部编码有两种：
 
@@ -26,9 +26,9 @@
 
 
 
-# 相关命令
+## 相关命令
 
-## 省流版
+### 省流版
 
 | 命令                                  | 执行效果                                    | 时间复杂度           |
 | ------------------------------------- | ------------------------------------------- | -------------------- |
@@ -45,15 +45,13 @@
 | hsetnx key field value                | 设置值，但必须在 field 不存在时才能设置成功 | O(1)                 |
 | hincrby key field n                   | 对应 field-value +n                         | O(1)                 |
 | hincrbyfloat key field n              | 对应 field-value +n                         | O(1)                 |
-| hstrlen key field                     | 计算 value 的字符串⻓度                     | O(1)                 |
+| hstrlen key field                     | 计算 value 的字符串长度                     | O(1)                 |
 
 
 
-## 增删查改
+### 插入数据
 
-
-
-### HSET
+#### HSET
 
 > 设置hash中指定的字段（field）的值（value）
 
@@ -63,7 +61,7 @@ HSET key field value [field value ...]
 
 **返回值：**添加的字段的个数。
 
-### HSETNX
+#### HSETNX
 
 > 在字段不存在的情况下，设置 hash 中的字段和值
 
@@ -71,9 +69,11 @@ HSET key field value [field value ...]
 HSETNX key field value
 ```
 
-**返回值：**1 表⽰设置成功，0 表⽰失败。
+**返回值：**1 表示设置成功，0 表示失败。
 
-### HGET
+### 获取数据
+
+#### HGET
 
 > 获取 hash 中指定字段的值
 
@@ -83,7 +83,7 @@ HGET key field
 
 **返回值：**字段对应的值或者 nil
 
-### HMGET
+#### HMGET
 
 > ⼀次获取 hash 中多个字段的值
 
@@ -95,9 +95,7 @@ HMGET key field [field ...]
 
 注：`HMSET` 用不上，因为 `HSET` 支持插入多条。
 
-
-
-### HEXISTS
+#### HEXISTS
 
 > 判断 hash 中是否有指定的字段
 
@@ -107,47 +105,7 @@ HEXISTS key field
 
 **返回值：**1 表示存在，0 表示不存在。
 
-### HDEL
-
-> 删除 hash 中指定的字段，即 hash 中的 field 及其对应的 key
-
-```
-HDEL key field [field ...]
-```
-
-**返回值：**本次操作删除的字段个数。
-
-### HKEYS
-
-> 获取 hash 中的所有字段，即对 key 对应的 hash 中所有的 field 进行遍历
-
-```
-HKEYS key
-```
-
-**返回值：**所有字段。
-
-### HVALS
-
-> 获取 hash 中的所有的值，即对 key 对应的 hash 中所有的 value 进行遍历
-
-```
-HVALS key
-```
-
-**返回值：**所有的值。
-
-### HGETALL （HKEYS + HVALS）
-
-> 获取 hash 中的所有字段以及对应的值。
-
-```
-HGETALL key
-```
-
-**返回值：**字段和对应的值。
-
-### HLEN
+#### HLEN
 
 > 获取 hash 中的所有字段的个数
 
@@ -157,11 +115,69 @@ HGETALL key
 
 **返回值：**字段个数。
 
+### 删除数据
+
+#### DEL
+
+> 删除指定的字段
+
+```
+DEL key [key ...]
+```
+
+**返回值：**本次操作删除的字段个数。
+
+#### HDEL
+
+> 删除 hash 中指定的字段，即 hash 中的 field 及其对应的 key
+
+```
+HDEL key field [field ...]
+```
+
+**返回值：**本次操作删除的字段个数。
+
+### 整体操作
+
+#### HKEYS
+
+> 获取 hash 中的所有字段，即对 key 对应的 hash 中所有的 field 进行遍历
+
+```
+HKEYS key
+```
+
+**返回值：**所有字段。
+
+#### HVALS
+
+> 获取 hash 中的所有的值，即对 key 对应的 hash 中所有的 value 进行遍历
+
+```
+HVALS key
+```
+
+**返回值：**所有的值。
 
 
-## 计数命令
 
-### HINCRBY
+
+
+#### HGETALL （HKEYS + HVALS）
+
+> 获取 hash 中的所有字段以及对应的值。
+
+```
+HGETALL key
+```
+
+**返回值：**字段和对应的值。
+
+
+
+### 计数命令
+
+#### HINCRBY
 
 > 将 hash 中字段对应的数值添加指定的值
 
@@ -171,7 +187,7 @@ HINCRBY key field increment
 
 **返回值：**该字段变化之后的值
 
-### HINCRBYFLOAT
+#### HINCRBYFLOAT
 
 > HINCRBY 的浮点数版本
 
@@ -181,4 +197,4 @@ HINCRBYFLOAT key field increment
 
 **返回值：**该字段变化之后的值。
 
-注 ： 无 HINCR、HDECR
+注 ： 无 HINCR、HDECR 
