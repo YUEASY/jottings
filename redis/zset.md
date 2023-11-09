@@ -17,8 +17,8 @@
 
 有序集合类型的内部编码有两种：
 
-- ziplist（压缩列表）：当有序集合的元素个数小于 zset-max-ziplist-entries 配置（默认 128 个），同时每个元素的值都小于 zset-max-ziplist-value 配置（默认 64 字节）时，Redis 会⽤ ziplist 来作为有序集合的内部实现，ziplist 可以有效减少内存的使⽤。
-- skiplist（跳表）：当 ziplist 条件不满足时，有序集合会使⽤ skiplist 作为内部实现，因为此时ziplist 的操作效率会下降。
+- ziplist（压缩列表）：当有序集合的元素个数小于 zset-max-ziplist-entries 配置（默认 128 个），同时每个元素的值都小于 zset-max-ziplist-value 配置（默认 64 字节）时，Redis 会用 ziplist 来作为有序集合的内部实现，ziplist 可以有效减少内存的使用。
+- skiplist（跳表）：当 ziplist 条件不满足时，有序集合会使用 skiplist 作为内部实现，因为此时ziplist 的操作效率会下降。
 
 >1. 当元素个数较少并且且每个元素较小时，内部编码为 ziplist
 >2. 当元素个数超过 128 个，内部编码 skiplist
@@ -50,16 +50,24 @@
 ZADD key [NX | XX] [GT | LT] [CH] [INCR] score member [score member...]
 ```
 
-**返回值：**本次添加成功的元素个数，若指定了 `CH`， 则再追加返回更新的元素的个数。
+**返回值：**本次添加成功的元素个数，
+
+- 若指定了 `CH`， 则再追加返回更新的元素的个数。
+
+- 若指定了 `INCR`，则返回增加后的元素分数。
 
 ### 更改分数
 
 #### ZINCRBY
 
 > 为指定的元素的关联分数添加指定的分数值
+>
+> zadd  key xx  score member 是直接更改
+>
+> zadd  key xx  increment member 可以达到相同的效果
 
 ```
-ZINCRBY key increment member
+ZINCRBY key incr increment member
 ```
 
 **返回值：**增加后元素的分数。
@@ -68,14 +76,16 @@ ZINCRBY key increment member
 
 #### ZRANGE
 
-> 返回指定区间⾥的元素，分数按照升序，
+> 返回指定区间里的元素，分数按照升序，
 >
 > 带上 WITHSCORES 可以把分数也返回
 >
-> 注：此处的 [start ,  stop]为下标构成的区间。从 0 开始，支持负数。
+> 注：此处的 [start ,  stop]为下标构成的区间。从 0 开始，支持负数
+>
+> 带上 BYSCORE 则将 [start ,  stop] 作为分数区间查找。
 
 ```
-ZRANGE key start stop [WITHSCORES]
+ZRANGE key start stop [BYSCORE] [WITHSCORES] 
 ```
 
 **返回值：**区间内的元素列表。
@@ -102,6 +112,8 @@ ZREVRANK key member
 
 #### ZSCORE
 
+> 返回指定元素的分数
+
 ```
 ZSCORE key member
 ```
@@ -123,6 +135,8 @@ ZSCARD key
 #### ZCOUNT
 
 > 返回分数在 min 和 max 之间的元素个数，默认情况下，min 和 max 都是包含的
+>
+> 可以使用 `(min` / `(max`来排除 min 或 max
 
 ```
 ZCOUNT key min max
