@@ -18,6 +18,8 @@
 有序集合类型的内部编码有两种：
 
 - ziplist（压缩列表）：当有序集合的元素个数小于 zset-max-ziplist-entries 配置（默认 128 个），同时每个元素的值都小于 zset-max-ziplist-value 配置（默认 64 字节）时，Redis 会用 ziplist 来作为有序集合的内部实现，ziplist 可以有效减少内存的使用。
+  - 在 6.2之后被 类似的 listpack 代替了
+
 - skiplist（跳表）：当 ziplist 条件不满足时，有序集合会使用 skiplist 作为内部实现，因为此时ziplist 的操作效率会下降。
 
 >1. 当元素个数较少并且且每个元素较小时，内部编码为 ziplist
@@ -92,7 +94,7 @@ ZRANGE key start stop [BYSCORE] [WITHSCORES]
 
 #### ZRANK
 
-> 返回指定元素的排名，升序
+> 返回指定元素的排名，从 0 开始，升序
 
 ```
 ZRANK key member
@@ -102,7 +104,7 @@ ZRANK key member
 
 #### ZREVRANK
 
-> 返回指定元素的排名，降序
+> 返回指定元素的排名，从 0 开始，降序
 
 ```
 ZREVRANK key member
@@ -222,23 +224,45 @@ BZPOPMIN key [key ...] timeout
 
 ### 集合操作
 
+**注：**6.2版本后才支持 `zinter`、`zunion`、`zdiff`
+
 #### 交 ZINTERSTORE
 
 > 求出给定 zset 中元素的交集并保存进目标 zset 中，在合并过程中以元素为单位进行合并，元素对应的分数按照不同的聚合方式和权重得到新的分数。
+>
+> numkeys：需要填写一共有几个 key 参与运算
+>
+> weight：权重，在计算时 key 中的 score 会乘上对应的 weight
+>
+> AGGREGATE：合并方式
+>
+> - SUM：结果取计算权重之后的总和 （默认）
+> - MIN：结果取按计算权重之后的最小值
+> - MAX：结果取按计算权重之后的最大值
 
 ```
 ZINTERSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE <SUM | MIN | MAX>]
 ```
 
-**返回值：**目标集合中的元素个数。
+**返回值：**结果集合中的元素个数。
 
 #### 并 SUNIONSTORE
 
 > 求出给定 zset 中元素的并集并保存进目标 zset 中，在合并过程中以元素为单位进行合并，元素对应的分数按照不同的聚合方式和权重得到新的分数。
+>
+> numkeys：需要填写一共有几个 key 参与运算
+>
+> weight：权重，在计算时 key 中的 score 会乘上对应的 weight
+>
+> AGGREGATE：合并方式
+>
+> - SUM：结果取计算权重之后的总和 （默认）
+> - MIN：结果取按计算权重之后的最小值
+> - MAX：结果取按计算权重之后的最大值
 
 ```
 ZUNIONSTORE destination numkeys key [key ...] [WEIGHTS weight [weight ...]] [AGGREGATE <SUM | MIN | MAX>]
 ```
 
-**返回值：**目标集合中的元素个数。
+**返回值：**结果集合中的元素个数。
 
